@@ -168,13 +168,14 @@ async def websearch(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return WEBSEARCH_QUERY
 
 async def handle_websearch_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Process web search query using direct Google search URLs"""
+    """Process web search query using direct Google search URLs and provide AI summary"""
     query = update.message.text
     chat_id = update.effective_chat.id
     user = update.effective_user
 
     try:
         logger.info(f"Web search initiated by {user.id} for query: '{query}'")
+        await update.message.reply_text("🔍 Searching and generating summary...")
 
         # Generate Google search URLs
         search_urls = generate_google_search_urls(query)
@@ -189,19 +190,31 @@ async def handle_websearch_query(update: Update, context: ContextTypes.DEFAULT_T
             }}}
         )
 
-        # Generate AI suggestion for the search
+        # Generate AI summary and search tips
+        summary_prompt = f"""
+        For the search query: "{query}"
+        
+        Provide a concise summary of what someone might find when searching this topic.
+        Include:
+        1. Key points or main information
+        2. Types of resources likely to be found
+        3. One specific search tip
+        
+        Keep the summary under 150 words.
+        """
+
         try:
-            suggestion = text_model.generate_content(
-                f"Give a brief search tip for finding information about '{query}' in 1 sentence:"
-            )
-            suggestion_text = suggestion.text if suggestion else "No search tips available"
+            ai_response = text_model.generate_content(summary_prompt)
+            summary_text = ai_response.text if ai_response else "Summary not available"
         except Exception as ai_error:
-            logger.warning(f"Suggestion generation failed: {str(ai_error)}")
-            suggestion_text = "⚠️ Could not generate search tips"
+            logger.warning(f"Summary generation failed: {str(ai_error)}")
+            summary_text = "⚠️ Could not generate search summary"
 
         # Build and send response
         response_lines = [
-            f"🔎 *Search Results for* {escape_markdown_v2(query)}:",
+            f"🔎 *Search Results for* {escape_markdown_v2(query)}:\n",
+            f"{escape_markdown_v2(summary_text)}\n",
+            "*Relevant Links:*"
         ]
 
         for i, url in enumerate(search_urls, 1):
@@ -222,7 +235,6 @@ async def handle_websearch_query(update: Update, context: ContextTypes.DEFAULT_T
         await update.message.reply_text("⚠️ Failed to process search request.")
 
     return ConversationHandler.END
-
 #========================= CHAT QUERY=============================
 async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Start a chat conversation with Gemini"""
@@ -397,3 +409,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

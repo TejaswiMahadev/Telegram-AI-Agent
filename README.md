@@ -53,7 +53,7 @@ Ensure you have the following installed:
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/TejaswiMahadev/telegram-ai-agent.git
+git clone https://github.com/TejaswiMahadev/Telegram-AI-Agent.git
 cd telegram-ai-agent
 ```
 

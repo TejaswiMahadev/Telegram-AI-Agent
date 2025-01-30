@@ -97,8 +97,6 @@ streamlit run dashboard.py
 ## Contributing
 Pull requests are welcome! If you'd like to contribute, fork the repo and create a PR with your changes.
 
-## License
-This project is licensed under the MIT License.
 
 ---
 🚀 *Happy coding!*

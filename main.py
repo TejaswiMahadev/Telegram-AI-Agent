@@ -26,6 +26,7 @@ db = client.telegram_bot
 users = db.users
 
 # Configure Gemini
+
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 text_model = genai.GenerativeModel("gemini-pro")
 vision_model = genai.GenerativeModel("gemini-1.5-flash")
@@ -47,6 +48,31 @@ def generate_google_search_urls(query, num_results=3):
         f"https://www.google.com/search?q={encoded_query}+tutorial"
     ]
     return base_urls[:num_results]
+
+def start_bot():
+    # Get the token from environment variable
+    TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+    
+    if not TOKEN:
+        raise ValueError("No Telegram bot token found in environment variables.")
+
+    async def start(update, context):
+        await update.message.reply_text('Hello!')
+
+    # Initialize the application
+    application = Application.builder().token(TOKEN).build()
+
+    # Add command handler
+    application.add_handler(CommandHandler("start", start))
+
+    # Set up webhook
+    WEBHOOK_URL = "https://telegram-ai-agent-rvf0.onrender.com"
+    application.run_webhook(
+        listen="0.0.0.0",
+        port=8000,
+        webhook_url=WEBHOOK_URL
+    )
+
 
 # User Registration Handlers
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
